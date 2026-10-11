@@ -41,15 +41,7 @@ from nanobot.providers.oauth_model_catalog import (
 )
 from nanobot.providers.registry import PROVIDERS, ProviderSpec, create_dynamic_spec, find_by_name
 from nanobot.providers.routing import resolve_automatic_model_api, resolve_model_api
-from nanobot.webui.request_settings import (
-    parse_request_object as _provider_json_setting,
-)
-from nanobot.webui.request_settings import (
-    redact_request_secrets as _redact_provider_secret_values,
-)
-from nanobot.webui.request_settings import (
-    validate_request_config as _validated_provider_config,
-)
+from nanobot.webui import request_settings
 from nanobot.webui.settings_contracts import (
     QueryParams,
     SettingsRequest,
@@ -111,6 +103,7 @@ _MODEL_CONFIGURATION_SLUG_RE = re.compile(r"[^a-z0-9_-]+")
 _ENV_REF_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 _PROVIDER_STRUCTURED_FIELDS = ("extra_headers", "extra_body", "extra_query")
 
+
 def _provider_config_updates(query: QueryParams) -> dict[str, Any]:
     updates: dict[str, Any] = {}
     string_fields = (
@@ -133,7 +126,7 @@ def _provider_config_updates(query: QueryParams) -> dict[str, Any]:
         ("extra_query", "extraQuery"),
     ):
         if query_has_alias(query, snake, camel):
-            updates[snake] = _provider_json_setting(query, snake, camel)
+            updates[snake] = request_settings.parse_request_object(query, snake, camel)
     if query_has_alias(query, "api", "api"):
         try:
             updates["api"] = json.loads(query_first(query, "api") or "null")
@@ -373,9 +366,9 @@ def _provider_settings_row(
         "provider_api_configurable": spec.provider_api_configurable,
         "model_api_configurable": len(request_apis) > 1,
         "advanced_fields": _provider_advanced_field_names(name, spec),
-        "extra_headers": _redact_provider_secret_values(provider_config.extra_headers),
-        "extra_body": _redact_provider_secret_values(provider_config.extra_body),
-        "extra_query": _redact_provider_secret_values(provider_config.extra_query),
+        "extra_headers": request_settings.redact_request_secrets(provider_config.extra_headers),
+        "extra_body": request_settings.redact_request_secrets(provider_config.extra_body),
+        "extra_query": request_settings.redact_request_secrets(provider_config.extra_query),
         "thinking_style": provider_config.thinking_style,
         "region": getattr(provider_config, "region", None),
         "profile": getattr(provider_config, "profile", None),
@@ -1441,7 +1434,7 @@ def create_provider_settings(config: Config, query: QueryParams) -> str:
 
     provider_key = _custom_provider_key(config, display_name)
     updates["display_name"] = display_name
-    provider_config = _validated_provider_config(None, updates)
+    provider_config = request_settings.validate_request_config(None, updates)
     setattr(config.providers, provider_key, provider_config)
     return provider_key
 
@@ -1497,7 +1490,7 @@ def update_provider_settings(
         if _provider_display_name_exists(config, display_name, exclude_key=provider_key):
             raise WebUISettingsError("provider already exists", status=409)
 
-    updated_provider_config = _validated_provider_config(provider_config, updates)
+    updated_provider_config = request_settings.validate_request_config(provider_config, updates)
     if updated_provider_config.api != provider_config.api:
         candidates = [
             *config.model_presets.values(), config.agents.defaults,

@@ -141,5 +141,3 @@ def validate_request_config(
             message = str(error.get("msg", "invalid value"))
             raise WebUISettingsError(f"{field}: {message}" if field else message) from exc
         raise WebUISettingsError(str(exc)) from exc
-
-
