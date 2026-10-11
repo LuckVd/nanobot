@@ -2285,6 +2285,7 @@
     }
   },
   "common": {
+    "retry": "Tentar novamente",
     "dismiss": "Descartar",
     "close": "Fechar",
     "current": "Atual",
