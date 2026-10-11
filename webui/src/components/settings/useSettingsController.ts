@@ -21,6 +21,7 @@ import type {
 } from "@/components/settings/contracts";
 import { agentDraftFromPayload } from "@/components/settings/models/ModelsSettings";
 import { modelAPISelection } from "@/components/settings/models/modelAPI";
+import { providerJsonValue } from "@/components/settings/models/providerForm";
 import { useModelSettingsActions } from "@/components/settings/models/useModelSettingsActions";
 import {
   useProviderFormsSync,
@@ -312,7 +313,11 @@ export function useSettingsController({
       imageGenerationForm.model !== settings.image_generation.model ||
       imageGenerationForm.defaultAspectRatio !== settings.image_generation.default_aspect_ratio ||
       imageGenerationForm.defaultImageSize !== settings.image_generation.default_image_size ||
-      imageGenerationForm.maxImagesPerTurn !== settings.image_generation.max_images_per_turn
+      imageGenerationForm.maxImagesPerTurn !== settings.image_generation.max_images_per_turn ||
+      (settings.image_generation.request_overrides_supported && (
+        imageGenerationForm.extraHeaders !== providerJsonValue(settings.image_generation.extra_headers) ||
+        imageGenerationForm.extraBody !== providerJsonValue(settings.image_generation.extra_body)
+      )) === true
     );
   }, [imageGenerationForm, settings]);
 

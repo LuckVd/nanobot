@@ -799,6 +799,9 @@ export interface SettingsPayload {
     default_image_size: string;
     max_images_per_turn: number;
     save_dir: string;
+    request_overrides_supported?: boolean;
+    extra_headers?: Record<string, string> | null;
+    extra_body?: Record<string, unknown> | null;
     providers: Array<{
       name: string;
       label: string;
@@ -809,6 +812,7 @@ export interface SettingsPayload {
       default_api_base?: string | null;
       models?: string[];
       default_model?: string | null;
+      uses_images_api?: boolean;
     }>;
   };
   transcription?: {
@@ -1395,6 +1399,8 @@ export interface ImageGenerationSettingsUpdate {
   defaultAspectRatio: string;
   defaultImageSize: string;
   maxImagesPerTurn: number;
+  extraHeaders?: string;
+  extraBody?: string;
 }
 
 export interface TranscriptionSettingsUpdate {

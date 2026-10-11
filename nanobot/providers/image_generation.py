@@ -253,20 +253,37 @@ def register_image_gen_provider(cls: type[ImageGenerationProvider]) -> None:
     _IMAGE_GEN_PROVIDERS[name] = cls
 
 
-def get_image_gen_provider(name: str) -> type[ImageGenerationProvider] | None:
-    return _IMAGE_GEN_PROVIDERS.get(name)
+def get_image_gen_provider(
+    name: str, connection: ProviderConfig | None = None,
+) -> type[ImageGenerationProvider] | None:
+    """Resolve a connection ID to its image adapter, not a display name.
+
+    Selecting a dynamic connection explicitly opts into the OpenAI Images API.
+    Built-in chat-only connections do not acquire image support implicitly.
+    """
+    registered = _IMAGE_GEN_PROVIDERS.get(name)
+    if registered is not None:
+        return registered
+    if find_by_name(name) is None and connection is not None and connection.api_base:
+        return _IMAGE_GEN_PROVIDERS["custom"]
+    return None
 
 
-def image_gen_provider_names() -> tuple[str, ...]:
+def image_gen_provider_names(config: Config | None = None) -> tuple[str, ...]:
     """Return registered image generation provider names in registry order."""
-    return tuple(_IMAGE_GEN_PROVIDERS)
+    dynamic = (config.providers.model_extra or {}) if config is not None else {}
+    return (
+        *tuple(_IMAGE_GEN_PROVIDERS),
+        *(name for name, connection in dynamic.items()
+          if name not in _IMAGE_GEN_PROVIDERS and get_image_gen_provider(name, connection)),
+    )
 
 
 def image_gen_provider_configs(config: Config) -> dict[str, ProviderConfig]:
     providers_cfg = config.providers
     return {
         name: pc
-        for name in _IMAGE_GEN_PROVIDERS
+        for name in image_gen_provider_names(config)
         if (pc := getattr(providers_cfg, name, None)) is not None
     }
 

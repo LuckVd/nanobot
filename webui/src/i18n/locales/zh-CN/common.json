@@ -1228,6 +1228,8 @@
       "thirdPartyBrands": "产品名称、Logo 和品牌归各自所有者所有；此处仅用于识别，不代表背书或合作。"
     },
     "image": {
+      "imagesApiHint": "通过此连接的地址调用 OpenAI Images API。请确认该接口支持生图。",
+      "requestOverridesHint": "这些覆盖只用于生图。留空使用提供商设置；更换提供商会清空覆盖。",
       "selectProvider": "选择提供商",
       "selectAspect": "选择比例",
       "selectSize": "选择尺寸",

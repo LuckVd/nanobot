@@ -1363,6 +1363,8 @@ export async function updateImageGenerationSettings(
       default_aspect_ratio: update.defaultAspectRatio,
       default_image_size: update.defaultImageSize,
       max_images_per_turn: update.maxImagesPerTurn,
+      ...(update.extraHeaders !== undefined ? { extra_headers: update.extraHeaders } : {}),
+      ...(update.extraBody !== undefined ? { extra_body: update.extraBody } : {}),
     },
   );
 }

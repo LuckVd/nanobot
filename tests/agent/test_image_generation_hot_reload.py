@@ -17,6 +17,7 @@ from nanobot.agent.tools.registry import ToolRegistry
 from nanobot.bus.queue import MessageBus
 from nanobot.config.loader import load_config, save_config
 from nanobot.config.schema import ToolsConfig
+from nanobot.webui.settings_models import create_provider_settings
 
 
 def _runtime_state(tmp_path):
@@ -25,6 +26,25 @@ def _runtime_state(tmp_path):
         tools_config=ToolsConfig(),
         _image_generation_provider_configs={},
     )
+
+
+async def test_dynamic_image_overrides_reload_without_changing_inflight_client(tmp_path, monkeypatch):
+    monkeypatch.setattr("nanobot.config.loader._current_config_path", tmp_path / "config.json")
+    config = load_config()
+    name = create_provider_settings(config, {"name": ["Image gateway"], "apiBase": ["https://images.test/v1"]})
+    config.tools.image_generation.enabled = True
+    config.tools.image_generation.provider = name
+    config.tools.image_generation.extra_headers = {"X-Route": "before"}
+    save_config(config)
+    state, registry = _runtime_state(tmp_path), ToolRegistry()
+    await reload_image_generation_tool(state, registry)
+    first = registry.get("generate_image")._provider_client()
+    config.tools.image_generation.extra_headers = {"X-Route": "after"}
+    save_config(config)
+    await reload_image_generation_tool(state, registry)
+    second = registry.get("generate_image")._provider_client()
+    assert first.extra_headers == {"X-Route": "before"}
+    assert second.extra_headers == {"X-Route": "after"}
 
 
 @pytest.mark.asyncio

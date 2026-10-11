@@ -1042,6 +1042,8 @@
       "thirdPartyBrands": "Nomes de produtos, logotipos e marcas são propriedades de seus respectivos donos. O uso é apenas para identificação e não implica endosso."
     },
     "image": {
+      "imagesApiHint": "Usa a OpenAI Images API na URL desta conexão. Verifique se o endpoint gera imagens.",
+      "requestOverridesHint": "Estes ajustes se aplicam apenas a imagens. Campos vazios usam o provedor. Trocar de provedor apaga estes ajustes.",
       "selectProvider": "Selecionar provedor",
       "selectAspect": "Selecionar proporção",
       "selectSize": "Selecionar tamanho",
