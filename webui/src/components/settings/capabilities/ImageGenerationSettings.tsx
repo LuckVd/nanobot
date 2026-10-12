@@ -57,6 +57,7 @@ export function ImageGenerationSettings({
   saving,
   onChangeForm,
   onSave,
+  onSaveRequestSettings,
   onOpenProviders,
   showBrandLogos,
   onRestart,
@@ -73,6 +74,7 @@ export function ImageGenerationSettings({
   saving: boolean;
   onChangeForm: Dispatch<SetStateAction<ImageGenerationSettingsUpdate>>;
   onSave: () => void;
+  onSaveRequestSettings: (values: Pick<ImageGenerationSettingsUpdate, "extraHeaders" | "extraBody">) => Promise<void>;
   onOpenProviders: () => void;
   showBrandLogos: boolean;
   onRestart?: () => void;
@@ -198,6 +200,8 @@ export function ImageGenerationSettings({
             <div className="settings-list-inset space-y-3 py-3">
               <p className="text-[13px] text-muted-foreground">{t("settings.image.requestOverridesHint")}</p>
               <ProviderParameterFields fields={["extra_headers", "extra_body"]}
+                inherit disabled={saving || dirty || missingCredential}
+                onSave={onSaveRequestSettings}
                 form={{ extraHeaders: form.extraHeaders ?? "", extraBody: form.extraBody ?? "", extraQuery: "" }}
                 onChange={(value) => onChangeForm((prev) => ({ ...prev, ...value }))}
               />

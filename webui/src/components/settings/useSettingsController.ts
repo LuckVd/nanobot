@@ -599,6 +599,7 @@ export function useSettingsController({
     runProviderOAuth,
     saveImageGenerationSettings,
     saveModelSettings,
+    saveImageRequestSettings: capabilityActions.saveImageRequestSettings,
     saveNetworkSafetySettings,
     saveProvider,
     saveTranscriptionSettings,

@@ -458,6 +458,7 @@ export function SettingsPage({
               saving={imageGenerationSaving}
               onChangeForm={setImageGenerationForm}
               onSave={saveImageGenerationSettings}
+              onSaveRequestSettings={controller.saveImageRequestSettings}
               onOpenProviders={() => selectSection("models")}
               showBrandLogos={localPrefs.brandLogos}
               onRestart={restartViaSettingsSurface}

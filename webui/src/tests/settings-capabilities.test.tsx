@@ -22,19 +22,24 @@ describe("Settings capabilities", () => {
         extra_body: args.extra_body ? JSON.parse(args.extra_body) : null,
       },
     }));
+    requestMutationMock.mockRejectedValueOnce(new Error("Could not save. Try again."));
     renderSettingsView({ initialSection: "image", initialSettings: payload });
     expect(screen.getByRole("combobox", { name: "SenseNova", exact: true })).toBeVisible();
     expect(screen.getByRole("button", { name: "Provider", exact: true })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Advanced options" }));
-    fireEvent.click(screen.getByRole("button", { name: "Body parameters Not configured Edit" }));
+    fireEvent.click(screen.getByRole("button", { name: "Body parameters Use provider settings Edit" }));
     const editor = screen.getByRole("dialog", { name: "Body parameters" });
     fireEvent.change(within(editor).getByRole("textbox", { name: "Body parameters" }), { target: { value: '{"watermark":false}' } });
+    fireEvent.click(within(editor).getByRole("button", { name: "Save", exact: true }));
+    expect(await within(editor).findByRole("alert")).toHaveTextContent("Could not save. Try again.");
+    expect(within(editor).getByRole("textbox")).toHaveValue('{"watermark":false}');
     fireEvent.click(within(editor).getByRole("button", { name: "Save", exact: true }));
     await waitFor(() => expect(requestMutationMock).toHaveBeenCalledWith(
       "settings.image_generation.update",
       expect.objectContaining({ provider: "custom-sensenova", extra_body: '{"watermark":false}' }),
       20_000,
     ));
+    expect(await screen.findByRole("button", { name: /Body parameters 1.*Edit/ })).toBeEnabled();
   });
 
   it("does not display a different image connection when the saved one is missing", () => {
