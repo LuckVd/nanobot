@@ -39,7 +39,7 @@ describe("Settings capabilities", () => {
       expect.objectContaining({ provider: "custom-sensenova", extra_body: '{"watermark":false}' }),
       20_000,
     ));
-    expect(await screen.findByRole("button", { name: /Body parameters 1.*Edit/ })).toBeEnabled();
+    expect(await screen.findByRole("button", { name: "Body parameters Entries: 1 Edit" })).toBeEnabled();
   });
 
   it("does not display a different image connection when the saved one is missing", () => {
